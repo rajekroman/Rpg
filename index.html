@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090705">
+  <meta name="description" content="Kroniky Stříbrné brány — původní retro 3D fantasy RPG pro prohlížeč a iPhone.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Stříbrná brána">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <title>Kroniky Stříbrné brány — Release Candidate 1.0</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app" aria-label="Kroniky Stříbrné brány">
+    <section id="title-screen" class="screen screen--active" aria-labelledby="game-title">
+      <div class="title-panel">
+        <p class="kicker">RETRO 3D RPG · RELEASE CANDIDATE 1.0</p>
+        <h1 id="game-title">Kroniky<br><span>Stříbrné brány</span></h1>
+        <p class="lead">Verze 1.0 RC: dokončitelná kampaň, deset oblastí, padesát úkolů, tři frakce, finální boss, PWA režim a offline mezipaměť.</p>
+        <div class="menu-stack">
+          <button id="new-game" class="button button--primary" type="button">Začít kampaň</button>
+          <button id="continue-game" class="button" type="button">Pokračovat</button>
+          <button id="controls-button" class="button" type="button">Ovládání</button>
+          <button id="audio-button" class="button" type="button">Nastavení zvuku</button>
+          <button id="settings-button" class="button" type="button">Obraz a přístupnost</button>
+          <button id="save-tools-button" class="button" type="button">Záloha uložené hry</button>
+          <button id="install-button" class="button hidden" type="button">Nainstalovat hru</button>
+        </div>
+        <p id="asset-status" class="asset-status" aria-live="polite">Připravuji grafiku a zvukovou banku…</p>
+        <p class="footnote">Kliknutí nebo dotyk aktivuje zvuk. Na počítači klikněte do herního obrazu pro rozhlížení myší.</p>
+        <p class="version-label">RC 1.0 · SAVE FORMAT 12 · PWA</p>
+      </div>
+    </section>
+
+    <section id="game-screen" class="screen" aria-label="Herní obrazovka">
+      <div id="viewport-shell">
+        <p id="canvas-description" class="sr-only">Pohled první osoby do fantasy světa. Důležité informace o cílech, nepřátelích a interakcích jsou současně uvedeny v textovém rozhraní.</p>
+        <canvas id="game-canvas" width="640" height="360" role="img" aria-label="3D herní obraz" aria-describedby="canvas-description" tabindex="0"></canvas>
+        <div id="crosshair" aria-hidden="true"></div>
+        <div id="zone-banner" aria-live="polite"></div>
+        <div id="save-indicator" class="save-indicator" aria-live="polite"></div>
+        <div id="orientation-hint" aria-live="polite">Pro pohodlnější hraní otočte telefon na šířku.</div>
+        <div id="interaction-hint" aria-live="polite"></div>
+        <div id="combat-target" class="hidden" aria-live="polite">
+          <div class="combat-target__heading"><strong id="combat-target-name">—</strong><span id="combat-target-distance">—</span></div>
+          <div class="combat-target__bar"><span id="combat-target-hp"></span></div>
+          <div id="combat-target-statuses" class="status-strip"></div>
+          <div class="combat-target__meta"><span id="combat-state">KLID</span><span id="combat-recovery">PŘIPRAVEN</span></div>
+        </div>
+        <div id="debug-overlay" class="hidden" aria-live="polite"></div>
+        <div id="ability-hotbar" class="ability-hotbar" aria-label="Rychlá lišta schopností"></div>
+
+        <aside id="party-panel" aria-label="Družina"></aside>
+
+        <div id="touch-layer" aria-hidden="false">
+          <div id="move-stick" class="touch-stick" aria-label="Pohyb">
+            <div class="touch-stick__knob"></div>
+          </div>
+          <div id="look-pad" aria-label="Rozhlížení"></div>
+          <div class="touch-buttons">
+            <button id="touch-attack" class="touch-attack" type="button">Útok</button>
+            <button id="touch-interact" type="button">Použít</button>
+            <button id="touch-tactical" type="button">Taktika</button>
+            <button id="touch-spellbook" type="button">Kouzla</button>
+            <button id="touch-pause" type="button">Menu</button>
+          </div>
+        </div>
+      </div>
+
+      <footer id="hud">
+        <section class="hud-panel minimap-panel" aria-label="Minimapa">
+          <canvas id="minimap" width="144" height="144"></canvas>
+          <span id="compass">N</span>
+        </section>
+        <section class="hud-panel log-panel" aria-label="Herní informace">
+          <div id="quest-tracker" aria-live="polite"></div>
+          <div id="game-log" aria-live="polite"></div>
+          <div class="status-row">
+            <span id="zone-name">—</span>
+            <span id="resource-status">0 zl. · pověst 0</span>
+            <span id="coordinates">X 0.0 · Y 0.0</span>
+          </div>
+        </section>
+        <section class="hud-panel action-panel" aria-label="Akce">
+          <div class="action-grid">
+            <button id="attack-button" class="action-attack" type="button">Útok<br><small>R / klik</small></button>
+            <button id="target-button" type="button">Další cíl<br><small>Tab</small></button>
+            <button id="tactical-button" type="button">Taktická pauza<br><small>T</small></button>
+            <button id="interact-button" type="button">Použít<br><small>F</small></button>
+            <button id="journal-button" type="button">Deník<br><small>J</small></button>
+            <button id="character-button" type="button">Postavy<br><small>C</small></button>
+            <button id="inventory-button" type="button">Inventář<br><small>I</small></button>
+            <button id="spellbook-button" type="button">Kniha kouzel<br><small>K</small></button>
+            <button id="map-button" type="button">Mapa<br><small>M</small></button>
+            <button id="save-button" type="button">Uložit<br><small>F5</small></button>
+            <button id="pause-button" type="button">Menu<br><small>Esc</small></button>
+            <button id="display-button" type="button">Nastavení<br><small>Video / A11y</small></button>
+          </div>
+          <div class="engine-state">
+            <span>ARCANE ENGINE</span>
+            <strong id="engine-status">READY</strong>
+          </div>
+        </section>
+      </footer>
+    </section>
+
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="modal-panel" class="modal__panel">
+        <button id="modal-close" class="modal__close" type="button" aria-label="Zavřít">×</button>
+        <h2 id="modal-title"></h2>
+        <div id="modal-body"></div>
+        <div id="modal-actions"></div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

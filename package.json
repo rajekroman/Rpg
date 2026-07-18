@@ -1,0 +1,11 @@
+{
+  "name": "kroniky-stribrne-brany",
+  "version": "1.0.0-rc.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/validate-maps.mjs && node tests/world-simulation.mjs && node tests/check-source.mjs && node tests/validate-story-data.mjs && node tests/validate-campaign-data.mjs && node tests/campaign-flow.mjs && node tests/ending-variants.mjs && node tests/final-boss-flow.mjs && node tests/side-quest-board-flow.mjs && node tests/validate-character-data.mjs && node tests/party-progression.mjs && node tests/quest-flow.mjs && node tests/quest-experience.mjs && node tests/dialogue-flow.mjs && node tests/validate-ui.mjs && node tests/validate-item-data.mjs && node tests/inventory-flow.mjs && node tests/economy-flow.mjs && node tests/loot-flow.mjs && node tests/save-migration.mjs && node tests/validate-enemy-data.mjs && node tests/combat-flow.mjs && node tests/combat-ai.mjs && node tests/combat-save.mjs && node tests/validate-ability-data.mjs && node tests/magic-flow.mjs && node tests/status-flow.mjs && node tests/magic-save.mjs && node tests/validate-ai-data.mjs && node tests/pathfinding-flow.mjs && node tests/group-ai-flow.mjs && node tests/enemy-abilities-flow.mjs && node tests/boss-phase-flow.mjs && node tests/ai-save.mjs && node tests/zone-transition-flow.mjs && node tests/dungeon-flow.mjs && node tests/trap-flow.mjs && node tests/time-flow.mjs && node tests/renderer-smoke.mjs && node tests/campaign-renderer-smoke.mjs && node tests/validate-assets.mjs && node tests/animation-state-flow.mjs && node tests/asset-manager-flow.mjs && node tests/renderer-assets-smoke.mjs && node tests/save-version-flow.mjs && node tests/validate-audio.mjs && node tests/audio-scene-flow.mjs && node tests/audio-manager-flow.mjs && node tests/validate-pwa.mjs && node tests/preferences-flow.mjs && node tests/save-recovery-flow.mjs && node tests/accessibility-static.mjs && node tests/release-budget.mjs",
+    "serve": "python3 -m http.server 8080",
+    "build": "python3 tools/generate_service_worker.py && python3 tools/build_release.py"
+  }
+}

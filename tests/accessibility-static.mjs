@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+const css = await readFile(new URL("../styles.css", import.meta.url), "utf8");
+const game = await readFile(new URL("../src/core/Game.js", import.meta.url), "utf8");
+assert.ok(!html.includes("user-scalable=no"), "Viewport nesmí blokovat zoom.");
+assert.ok(html.includes('aria-describedby="canvas-description"'));
+assert.ok(html.includes('role="dialog"'));
+assert.ok(css.includes(":focus-visible"));
+assert.ok(css.includes("pref-reduced-motion"));
+assert.ok(css.includes("pref-high-contrast"));
+assert.ok(game.includes('event.key !== "Tab"'), "Dialog musí držet fokus.");
+assert.ok(game.includes("lastFocusedElement"), "Po zavření dialogu se musí obnovit fokus.");
+console.log("Accessibility static OK: zoom, popis canvasu, fokus, kontrast a omezení pohybu.");

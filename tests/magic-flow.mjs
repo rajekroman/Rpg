@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import { World } from "../src/world/World.js";
+
+const world = new World();
+world.partyManager.awardExperience(500);
+const orin = world.partyManager.getMember("orin");
+world.selectPartyMember("orin", false);
+const hound = world.entities.find((entity) => entity.id === "echo-hound-west");
+world.update(0);
+world.combat.enemyStates[hound.id].hp = 200;
+world.player.x = hound.x - 4;
+world.player.y = hound.y;
+world.player.direction = 0;
+const mpBefore = orin.mp;
+const cast = world.castAbility("emberBolt", { memberId: "orin" });
+assert.ok(cast.ok && cast.projectile, cast.reason);
+assert.equal(orin.mp, mpBefore - 5);
+assert.ok(world.magic.getCooldown("orin", "emberBolt") > 0);
+for (let i = 0; i < 30 && world.combat.projectiles.length; i += 1) world.update(0.05);
+const afterImpact = world.combat.getEnemyState(hound.id).hp;
+assert.ok(afterImpact < 200, "Ohnivý projektil nezpůsobil poškození.");
+assert.ok(world.magic.getEnemyStatuses(hound.id).some((status) => status.id === "burning"));
+for (let i = 0; i < 24; i += 1) world.update(0.1);
+assert.ok(world.combat.getEnemyState(hound.id).hp < afterImpact, "Hoření nezpůsobilo periodické poškození.");
+
+const healWorld = new World();
+healWorld.partyManager.awardExperience(500);
+const daren = healWorld.partyManager.getMember("daren");
+healWorld.partyManager.applyDamage("daren", 30);
+healWorld.selectPartyMember("saela", false);
+const saela = healWorld.partyManager.getMember("saela");
+const manaBefore = saela.mp;
+const heal = healWorld.castAbility("mend", { memberId: "saela", targetMemberId: "daren" });
+assert.ok(heal.ok, heal.reason);
+assert.ok(daren.hp > daren.maxHp - 30);
+assert.equal(saela.mp, manaBefore - 5);
+const ward = healWorld.castAbility("guardianWard", { memberId: "saela" });
+assert.ok(ward.ok, ward.reason);
+assert.equal(healWorld.party.filter((member) => healWorld.magic.getPartyStatuses(member.id).some((status) => status.id === "warded")).length, 4);
+
+const areaWorld = new World();
+areaWorld.partyManager.awardExperience(500);
+areaWorld.selectPartyMember("orin", false);
+const enemies = areaWorld.entities.filter((entity) => entity.enemyId).slice(0, 3);
+enemies.forEach((entity, index) => { entity.x = 6 + index * 0.55; entity.y = 6; });
+areaWorld.player.x = 6;
+areaWorld.player.y = 6.5;
+const hpBefore = enemies.map((enemy) => areaWorld.combat.getEnemyState(enemy.id)?.hp ?? 999);
+const nova = areaWorld.castAbility("fireNova", { memberId: "orin" });
+assert.ok(nova.ok, nova.reason);
+const hpAfter = enemies.map((enemy) => areaWorld.combat.getEnemyState(enemy.id).hp);
+assert.ok(hpAfter.every((hp, index) => hp < hpBefore[index]), "Plošné kouzlo nezasáhlo všechny blízké cíle.");
+
+console.log("Magic flow OK: mana, cooldown, projektil, DOT, léčení, party buff a plošné kouzlo.");

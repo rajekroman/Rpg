@@ -1,0 +1,24 @@
+import assert from "node:assert/strict";
+import { World } from "../src/world/World.js";
+
+const world = new World();
+for (const entity of world.entities) if (entity.enemyId && entity.id !== "echo-warden") entity.hidden = true;
+const boss = world.entities.find((entity) => entity.id === "echo-warden");
+world.player.x = boss.x;
+world.player.y = boss.y + 3;
+const state = world.combat.ensureEnemyState(boss);
+state.alerted = true;
+state.hp = 160;
+world.update(0.1);
+const snapshot = world.snapshot();
+const restored = new World();
+restored.restore(snapshot);
+assert.equal(restored.combat.getEnemyBrain(boss.id)?.phase, 2, "AI fáze se neobnovila.");
+assert.equal(restored.entities.filter((entity) => entity.enemyId === "echoShade").length, 2, "Dynamicky přivolané jednotky se neobnovily.");
+const legacy = structuredClone(snapshot);
+delete legacy.combat.ai;
+const migrated = new World();
+migrated.restore(legacy);
+migrated.update(0.1);
+assert.ok(migrated.combat.getEnemyBrain(boss.id), "Migrace M06 nevytvořila nový AI stav.");
+console.log("AI save OK: mozky, boss fáze, dynamické jednotky a migrace M06.");

@@ -105,7 +105,7 @@ export class World {
     };
   }
 
-  move({ forward, strafe, turn }, dt, onStep = null) {
+  move({ forward, strafe, turn, pitch = 0 }, dt, onStep = null) {
     if (this.combat.tacticalPaused) return;
     const moveSpeed = 2.45;
     const turnSpeed = 1.85;
@@ -114,6 +114,7 @@ export class World {
     const normalizedStrafe = magnitude > 1 ? strafe / magnitude : strafe;
 
     this.player.direction = normalizeAngle(this.player.direction + turn * turnSpeed * dt);
+    this.player.pitch = clamp((this.player.pitch || 0) - pitch, -0.62, 0.62);
 
     const cos = Math.cos(this.player.direction);
     const sin = Math.sin(this.player.direction);

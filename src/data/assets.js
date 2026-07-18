@@ -84,10 +84,10 @@ export const ITEM_ICONS = Object.freeze(Object.fromEntries(ITEM_ICON_IDS.map((id
 export const ABILITY_ICONS = Object.freeze(Object.fromEntries(ABILITY_ICON_IDS.map((id, index) => [id, ITEM_ICON_IDS.length + index])));
 
 export const PORTRAITS = Object.freeze({
-  daren: assetUrl("ui/portrait-daren.png"),
-  lyra: assetUrl("ui/portrait-lyra.png"),
-  orin: assetUrl("ui/portrait-orin.png"),
-  saela: assetUrl("ui/portrait-saela.png"),
+  daren: assetUrl("ui/professional/portrait-daren.png"),
+  lyra: assetUrl("ui/professional/portrait-lyra.png"),
+  orin: assetUrl("ui/professional/portrait-orin.png"),
+  saela: assetUrl("ui/professional/portrait-saela.png"),
 });
 
 export const ASSET_MANIFEST = Object.freeze({

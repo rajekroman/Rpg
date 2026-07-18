@@ -3,7 +3,7 @@ import { Clock } from "./Clock.js";
 import { InputManager } from "./InputManager.js";
 import { PreferencesManager } from "./PreferencesManager.js";
 import { SaveManager } from "./SaveManager.js";
-import { Raycaster } from "../render/Raycaster.js";
+import { HybridRenderer } from "../render/HybridRenderer.js";
 import { Hud } from "../ui/Hud.js";
 import { World } from "../world/World.js";
 import { DialogueManager } from "../systems/DialogueManager.js";
@@ -35,7 +35,7 @@ export class Game {
     this.preferences = new PreferencesManager();
     this.preferences.apply(this.document.documentElement);
     this.audio = audio || new AudioManager();
-    this.renderer = new Raycaster(this.elements.gameCanvas, this.assets);
+    this.renderer = new HybridRenderer(this.elements.gameCanvas, this.assets);
     this.input = new InputManager({
       canvas: this.elements.gameCanvas,
       moveStick: this.elements.moveStick,
@@ -54,9 +54,17 @@ export class Game {
       resourceStatus: this.elements.resourceStatus,
       combatTarget: this.elements.combatTarget,
       abilityHotbar: this.elements.abilityHotbar,
+      quickInventory: this.elements.quickInventory,
       assets: this.assets,
       onPartyMemberSelect: (memberId) => this.showCharacters(memberId),
       onAbilityUse: (slotIndex) => this.castHotbar(slotIndex),
+      onQuickItemUse: (itemId) => {
+        if (!this.world) return;
+        const result = this.world.useItem(itemId, this.world.activeMemberId);
+        this.#flushWorldNotifications();
+        this.audio.playUi(result.ok ? 659.25 : 174.61, 0.06);
+      },
+      onOpenInventory: () => this.showInventory(),
     });
     this.dialogue = new DialogueManager(DIALOGUES);
 
@@ -1022,6 +1030,7 @@ export class Game {
     this.elements.interactButton.addEventListener("click", () => this.interact());
     this.elements.touchInteract.addEventListener("click", () => this.interact());
     this.elements.mapButton.addEventListener("click", () => this.hud.toggleFullMap());
+    this.elements.restButton.addEventListener("click", () => this.restParty());
     this.elements.journalButton.addEventListener("click", () => this.showJournal());
     this.elements.characterButton.addEventListener("click", () => this.showCharacters());
     this.elements.inventoryButton.addEventListener("click", () => this.showInventory());
@@ -1173,6 +1182,7 @@ export class Game {
       interactionHint: byId("interaction-hint"),
       combatTarget: byId("combat-target"),
       abilityHotbar: byId("ability-hotbar"),
+      quickInventory: byId("quick-inventory"),
       debugOverlay: byId("debug-overlay"),
       partyPanel: byId("party-panel"),
       minimap: byId("minimap"),
@@ -1187,6 +1197,7 @@ export class Game {
       tacticalButton: byId("tactical-button"),
       interactButton: byId("interact-button"),
       mapButton: byId("map-button"),
+      restButton: byId("rest-button"),
       journalButton: byId("journal-button"),
       characterButton: byId("character-button"),
       inventoryButton: byId("inventory-button"),

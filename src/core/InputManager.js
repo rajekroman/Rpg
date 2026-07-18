@@ -22,11 +22,14 @@ export class InputManager {
     this.pressed = new Set();
     this.pointerLocked = false;
     this.lookDelta = 0;
+    this.lookDeltaY = 0;
     this.touchMove = { x: 0, y: 0 };
     this.touchLookDelta = 0;
+    this.touchLookDeltaY = 0;
     this.moveTouchId = null;
     this.lookTouchId = null;
     this.lookLastX = 0;
+    this.lookLastY = 0;
     this.stickOrigin = { x: 0, y: 0 };
     this.enabled = true;
     this.bound = [];
@@ -48,7 +51,9 @@ export class InputManager {
       this.touchMove.x = 0;
       this.touchMove.y = 0;
       this.lookDelta = 0;
+      this.lookDeltaY = 0;
       this.touchLookDelta = 0;
+      this.touchLookDeltaY = 0;
       this.#resetStickVisual();
     }
   }
@@ -73,14 +78,18 @@ export class InputManager {
     if (this.#down("KeyQ") || this.#down("ArrowLeft")) turn -= 1;
     if (this.#down("KeyE") || this.#down("ArrowRight")) turn += 1;
 
-    forward = clamp(forward - this.touchMove.y, -1, 1);
-    strafe = clamp(strafe + this.touchMove.x, -1, 1);
-    turn = clamp(turn + (this.lookDelta + this.touchLookDelta) * 0.0065, -2.5, 2.5);
+    const curve = (value) => Math.abs(value) < 0.08 ? 0 : Math.sign(value) * Math.pow(Math.abs(value), 1.35);
+    forward = clamp(forward - curve(this.touchMove.y), -1, 1);
+    strafe = clamp(strafe + curve(this.touchMove.x), -1, 1);
+    turn = clamp(turn + (this.lookDelta + this.touchLookDelta) * 0.0048, -2.1, 2.1);
+    const pitch = clamp((this.lookDeltaY + this.touchLookDeltaY) * 0.0036, -1.25, 1.25);
 
     this.lookDelta = 0;
+    this.lookDeltaY = 0;
     this.touchLookDelta = 0;
+    this.touchLookDeltaY = 0;
 
-    return { forward, strafe, turn };
+    return { forward, strafe, turn, pitch };
   }
 
   #down(code) {
@@ -124,7 +133,7 @@ export class InputManager {
     });
 
     this.#listen(document, "mousemove", (event) => {
-      if (this.enabled && this.pointerLocked) this.lookDelta += event.movementX;
+      if (this.enabled && this.pointerLocked) { this.lookDelta += event.movementX; this.lookDeltaY += event.movementY; }
     });
 
     this.#bindMoveStick();
@@ -141,8 +150,11 @@ export class InputManager {
       this.moveTouchId = event.pointerId;
       this.moveStick.setPointerCapture?.(event.pointerId);
       const rect = this.moveStick.getBoundingClientRect();
-      this.stickOrigin.x = rect.left + rect.width / 2;
-      this.stickOrigin.y = rect.top + rect.height / 2;
+      this.stickOrigin.x = event.clientX;
+      this.stickOrigin.y = event.clientY;
+      this.moveStick.style.setProperty("--origin-x", `${event.clientX - rect.left}px`);
+      this.moveStick.style.setProperty("--origin-y", `${event.clientY - rect.top}px`);
+      this.moveStick.classList.add("is-active");
       update(event);
     };
 
@@ -165,6 +177,7 @@ export class InputManager {
       this.moveTouchId = null;
       this.touchMove.x = 0;
       this.touchMove.y = 0;
+      this.moveStick.classList.remove("is-active");
       this.#resetStickVisual();
     };
 
@@ -182,15 +195,18 @@ export class InputManager {
       event.preventDefault();
       this.lookTouchId = event.pointerId;
       this.lookLastX = event.clientX;
+      this.lookLastY = event.clientY;
       this.lookPad.setPointerCapture?.(event.pointerId);
     });
 
     this.#listen(this.lookPad, "pointermove", (event) => {
       if (event.pointerId !== this.lookTouchId) return;
       const delta = event.clientX - this.lookLastX;
+      const deltaY = event.clientY - this.lookLastY;
       this.lookLastX = event.clientX;
+      this.lookLastY = event.clientY;
       this.touchLookDelta += delta;
-    });
+      this.touchLookDeltaY += deltaY;    });
 
     const end = (event) => {
       if (event.pointerId === this.lookTouchId) this.lookTouchId = null;

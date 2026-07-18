@@ -8,6 +8,6 @@ if DIST.exists(): shutil.rmtree(DIST)
 DIST.mkdir()
 for name in ["index.html", "styles.css", "manifest.webmanifest", "sw.js", ".nojekyll"]:
     shutil.copy2(ROOT / name, DIST / name)
-for directory in ["src", "assets"]:
+for directory in ["src", "assets", "vendor"]:
     shutil.copytree(ROOT / directory, DIST / directory)
 print(f"Built {DIST}")

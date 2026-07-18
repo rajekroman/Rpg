@@ -1,38 +1,67 @@
-# Kroniky Stříbrné brány — Release Candidate 1.0
+# Kroniky Stříbrné brány — Professional Visual Edition 2.0
 
-Původní retro 3D fantasy RPG pro moderní prohlížeče a iPhone. Projekt používá vlastní raycastingový engine, svět, postavy, grafiku, hudbu a příběh. Inspiruje se strukturou first-person RPG devadesátých let, ale nekopíruje konkrétní hru ani její assety.
+Původní first-person fantasy RPG pro prohlížeče, počítače a iPhone. Verze `2.0.0` zachovává dokončitelnou kampaň a nahrazuje předchozí prototypovou grafiku jednotnou, dospělou vizuální vrstvou inspirovanou klasickými dungeon RPG devadesátých let.
 
-## Obsah
+## Vizuální identita
+
+- nízké interní rozlišení 320–512 px s nearest-neighbour škálováním,
+- prostorové WebGL prostředí s perspektivou, mlhou, světlem a základními stíny,
+- vlastní kamenné, dřevěné, travnaté a runové textury,
+- dospělé nízkopolygonové modely šesti nepřátelských archetypů,
+- čtyři ručně kurátorované portréty družiny,
+- jednotná sada 50 předmětových a schopnostních ikon,
+- tmavý kamenný HUD s mosaznými hranami,
+- velký herní obraz bez překrývajících se mobilních panelů,
+- filmovější, tlumená barevnost bez pastelových „dětských“ spriteů.
+
+Staré bitmapové atlasy zůstávají pouze jako technický fallback pro nouzový Canvas renderer. Hlavní WebGL renderer používá profesionální materiály, modely a portréty z edice 2.0.
+
+## Rozhraní
+
+Obrazovka je rozdělena podle osvědčené struktury klasických dungeon RPG:
+
+- vlevo čtyři karty družiny s HP a manou,
+- uprostřed pohled první osoby,
+- dole minimapa, utility lišta, textový log a osm schopností,
+- vpravo rychlý inventář a systémové volby,
+- na telefonu pouze kontextový joystick a dotyková plocha pro rozhlížení; žádná druhá překrývající se sada tlačítek.
+
+## Herní obsah
 
 - 10 propojených oblastí,
-- 20 hlavních a 30 vedlejších questů,
-- 3 frakce s oddělenou reputací,
-- 15 dialogových stromů a 7 zakázkových tabulí,
-- 183 mapových entit a 60 bojových setkání,
+- 20 hlavních a 30 vedlejších úkolů,
+- 3 frakce,
+- 15 dialogových stromů,
+- 183 mapových entit,
+- 60 bojových setkání,
 - 46 předmětů,
-- 4 hrdinové, 15 dovedností a 16 aktivních schopností,
-- boj v reálném čase, taktická pauza, magie, loot a obchody,
-- čtyřfázový závěrečný boss Mor-Kharr,
-- 9 variant epilogu,
-- 7 grafických atlasů, 4 portréty a 64 komprimovaných MP3 assetů.
+- 16 aktivních schopností,
+- čtyřfázový závěrečný boss,
+- 9 variant epilogu.
 
-## Release funkce
+## Ovládání
 
-- PWA manifest a instalace na domovskou obrazovku,
-- service worker s offline cache,
-- GitHub Pages deployment workflow,
-- kvalita vykreslení Auto / Úsporná / Vyvážená / Vysoká,
-- vysoký kontrast, větší text, omezení pohybu a volitelný zaměřovač,
-- nastavitelná viditelnost dotykových prvků,
-- automatické ukládání každé dvě minuty a při skrytí aplikace,
-- kontrolní součet uložené pozice a automatická záloha předchozího save,
-- export a import uložené hry ve formátu JSON,
-- audio načítané na pozadí, takže menu nečeká na celou banku,
-- komprimovaná audio banka zmenšená z 22,1 MiB WAV na přibližně 3 MiB MP3.
+### Počítač
+
+- `WASD` — pohyb,
+- myš — rozhlížení,
+- kliknutí nebo `R` — útok,
+- `1–8` — schopnosti,
+- `F` — interakce,
+- `Tab` — další cíl,
+- `T` — taktická pauza,
+- `Esc` — menu.
+
+### Telefon
+
+- levá část výhledu — kontextový pohybový joystick,
+- pravá část výhledu — rozhlížení v obou osách,
+- spodní HUD — útok, použití, cílení, mapa, odpočinek, schopnosti a inventář,
+- doporučená orientace na šířku.
 
 ## Spuštění
 
-Projekt používá ES moduly, proto jej spouštějte přes HTTP:
+Projekt používá ES moduly a musí běžet přes HTTP:
 
 ```bash
 python3 -m http.server 8080
@@ -40,48 +69,27 @@ python3 -m http.server 8080
 
 Poté otevřete `http://localhost:8080`.
 
-## Ovládání
-
-- `WASD` — pohyb
-- myš / dotyk — rozhlížení
-- kliknutí nebo `R` — základní útok
-- `1–8` — schopnosti rychlé lišty
-- `F1–F4` — aktivní člen družiny
-- `F` — interakce
-- `Tab` — další bojový cíl
-- `T` — taktická pauza
-- `J` — deník
-- `C` — postavy
-- `I` — inventář
-- `K` — kniha kouzel
-- `M` — mapa
-- `F5` — uložit
-
-## Testy
+## Testy a produkční build
 
 ```bash
 npm test
+npm run build
 ```
 
-Testovací sada obsahuje 53 navazujících skupin. Kontroluje celou kampaň, devět zakončení, finální boss fight, mapy, renderer, inventář, ekonomiku, AI, magii, audio, PWA, přístupnost, zálohování save a release rozpočty.
+Testovací sada obsahuje 53 skupin pokrývajících mapy, kampaň, souboje, AI, magii, inventář, audio, ukládání, PWA, přístupnost a statický kontrakt profesionální vizuální edice.
 
-## Nasazení na GitHub Pages
+Produkční GitHub Pages obsah vznikne v adresáři `dist/`.
 
-Workflow `.github/workflows/pages.yml` po pushi do `main`:
+## Dokumentace
 
-1. spustí `npm test`,
-2. vytvoří čistý statický adresář `dist`,
-3. publikuje jej přes GitHub Pages.
+- `PROFESSIONAL_VISUAL_EDITION.md` — renderer, materiály, modely a HUD,
+- `FINAL_RELEASE_REPORT.md` — předávací a validační protokol,
+- `PROFESSIONAL_FINAL_PREVIEW.png` — cílová kompozice rozhraní,
+- `PROFESSIONAL_ASSET_SHEET.png` — skutečně dodávané portréty, textury, ikony a PWA identita.
 
-V nastavení repozitáře musí být Pages zdroj nastaven na **GitHub Actions**.
+## Ověřená omezení
 
-## Známá omezení RC
-
-- kampaň byla automaticky simulována, ale nebyla kompletně ručně dohrána na fyzickém iPhonu,
-- pokus o Chromium průchod v pracovním prostředí blokovala organizační politika přístupu k lokálním URL,
-- balancing ekonomiky, zkušeností a některých pozdějších bojů vyžaduje lidský playtest,
-- nové oblasti stále sdílejí část grafických atlasů,
-- billboardy nemají osm směrových pohledů,
-- dabing a prostorový 3D zvuk nejsou součástí RC.
-
-Podrobnosti jsou v `MILESTONE_12_REPORT.md` a `RELEASE_QA.md`.
+- Automatické modulové, datové, HTTP a PWA testy prošly.
+- Pracovní prostředí blokuje Chromium na lokálních i přesměrovaných adresách, proto zde nebylo možné pořídit důvěryhodný screenshot skutečného WebGL výstupu.
+- Finální vizuální kontrola latence, čitelnosti a proporcí musí proběhnout na živé GitHub Pages stránce a fyzickém iPhonu.
+- Náhled rozhraní je designová kompozice, nikoli tvrzení, že jde o browserový screenshot.

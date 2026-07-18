@@ -5,13 +5,14 @@ import json
 ROOT = Path(__file__).resolve().parents[1]
 paths = [Path("index.html"), Path("styles.css"), Path("manifest.webmanifest")]
 paths += sorted((ROOT / "src").rglob("*.js"))
-paths += sorted((ROOT / "assets").rglob("*.png"))
+paths += sorted(path for path in (ROOT / "assets").rglob("*") if path.is_file() and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".mp3", ".json"})
+paths += sorted((ROOT / "vendor").rglob("*.js"))
 relative = []
 for item in paths:
     path = item if not item.is_absolute() else item.relative_to(ROOT)
     relative.append("./" + path.as_posix())
 relative = sorted(set(["./"] + relative))
-source = f'''const CACHE_VERSION = "ksb-1.0.0-rc1";
+source = f'''const CACHE_VERSION = "ksb-2.0.0-professional";
 const CORE_CACHE = `${{CACHE_VERSION}}-core`;
 const RUNTIME_CACHE = `${{CACHE_VERSION}}-runtime`;
 const CORE_ASSETS = {json.dumps(relative, ensure_ascii=False, indent=2)};

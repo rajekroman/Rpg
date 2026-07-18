@@ -1,5 +1,49 @@
 # Changelog
 
+## 2.0.0 — Professional Visual Edition
+
+- nahrazena aktivní dětsky působící sprite vrstva dospělými nízkopolygonovými modely nepřátel,
+- přidány kurátorované portréty družiny a nová PWA identita,
+- přidáno osm profesionálních materiálů prostředí,
+- kompletně sjednocen HUD a odstraněny překrývající se mobilní panely,
+- vytvořeno 50 nových ikon předmětů a schopností bez emoji a pastelových placeholderů,
+- hlavní obraz běží v nízkém interním rozlišení s nearest-neighbour škálováním,
+- service worker používá cache `ksb-2.0.0-professional`,
+- zachována kampaň, save v12, audio a všech 53 testovacích skupin.
+
+## 1.2.0-beta.2 — Pixel Rebuild
+
+### Přidáno
+
+- kostkované dungeon-RPG rozložení podle dodané vizuální reference,
+- čtyři velké karty družiny s číselnými HP a manou,
+- kamenný spodní HUD s minimapou, utility lištou, logem, hotbarem a rychlým inventářem 3×3,
+- 72 nových snímků bitmapových nepřátel,
+- 56 nových snímků světových objektů,
+- nové portréty a velká zbraň v první osobě,
+- deterministický generátor retro assetů,
+- pixelový world billboard renderer.
+
+### Změněno
+
+- WebGL nyní běží v nízkém interním rozlišení bez antialiasingu a mipmap,
+- kamenné, dřevěné a travnaté materiály používají výrazné pixelové dlaždice,
+- mobilní joystick vzniká v místě dotyku,
+- PWA cache byla zvýšena na `ksb-1.2.0-pixel2`,
+- Visual Beta 1.1 fullscreen overlay byl nahrazen pevným retro frame layoutem.
+
+### Opraveno
+
+- starý spodní HUD se již nevykresluje současně s novou mobilní vrstvou,
+- velká duplicitní mobilní tlačítka již nezakrývají scénu,
+- karty družiny jsou nad dotykovou pohybovou zónou a zůstávají klikatelné,
+- změna cache zabraňuje míchání starého CSS s novým HTML.
+
+### Ověření
+
+- všech 53 testovacích skupin prochází,
+- praktický WebGL screenshot a citlivost ovládání musí být ověřeny na fyzickém iPhonu.
+
 ## 1.0.0-rc.1 — Milník 12
 
 ### Přidáno
@@ -418,3 +462,13 @@ Automatický vizuální test Chromium se v kontejneru nepodařilo spustit kvůli
 
 - raycastingový renderer,
 - ovládání, mapa, kolize, interakce, HUD a ukládání.
+
+## 1.1.0-beta.1 — Visual rebuild
+
+- Nahrazen hlavní 2D raycastingový výstup skutečným WebGL 3D rendererem.
+- Přidán automatický fallback na původní Canvas renderer.
+- Přidány prostorové modely nepřátel, objektů, projektilů a zbraně.
+- Přidány stíny, dynamické světlo, mlha, tone mapping a procedurální kulisy.
+- Odstraněn pevný 166px spodní HUD; herní obraz nyní využívá celou obrazovku.
+- Kompletně změněno dotykové ovládání a přidán vertikální pohled.
+- Three.js je uložen lokálně a dostupný offline přes service worker.

@@ -22,9 +22,12 @@ export class Hud {
     resourceStatus,
     combatTarget,
     abilityHotbar,
+    quickInventory = null,
     assets = null,
     onPartyMemberSelect = null,
     onAbilityUse = null,
+    onQuickItemUse = null,
+    onOpenInventory = null,
   }) {
     this.partyPanel = partyPanel;
     this.minimap = minimap;
@@ -46,9 +49,12 @@ export class Hud {
     this.combatRecovery = combatTarget.querySelector("#combat-recovery");
     this.combatTargetStatuses = combatTarget.querySelector("#combat-target-statuses");
     this.abilityHotbar = abilityHotbar;
+    this.quickInventory = quickInventory;
     this.assets = assets;
     this.onPartyMemberSelect = onPartyMemberSelect;
     this.onAbilityUse = onAbilityUse;
+    this.onQuickItemUse = onQuickItemUse;
+    this.onOpenInventory = onOpenInventory;
     this.logs = [];
     this.lastInteractableId = null;
     this.showFullMap = false;
@@ -57,6 +63,7 @@ export class Hud {
     this.lastPartySignature = "";
     this.lastCombatSignature = "";
     this.lastMagicSignature = "";
+    this.lastQuickSignature = "";
   }
 
   render(world, fps = 0) {
@@ -66,6 +73,7 @@ export class Hud {
     this.#renderQuestTracker(world);
     this.#renderCombat(world);
     this.#renderHotbar(world);
+    this.#renderQuickInventory(world);
     this.zoneName.textContent = world.zone.name;
     this.coordinates.textContent = `X ${world.player.x.toFixed(1)} · Y ${world.player.y.toFixed(1)}`;
     const inventory = world.getInventoryView();
@@ -132,6 +140,7 @@ export class Hud {
     this.lastPartySignature = "";
     this.lastCombatSignature = "";
     this.lastMagicSignature = "";
+    this.lastQuickSignature = "";
   }
 
   #renderParty(world) {
@@ -194,6 +203,7 @@ export class Hud {
       const hpBar = document.createElement("span");
       hpBar.className = "stat-bar stat-bar--hp";
       hpBar.title = `Život ${member.hp}/${member.maxHp}`;
+      hpBar.dataset.value = `${Math.max(0, Math.round(member.hp))}/${Math.max(0, Math.round(member.maxHp))}`;
       const hpFill = document.createElement("span");
       hpFill.style.width = `${Math.max(0, Math.min(100, member.hp / member.maxHp * 100))}%`;
       hpBar.append(hpFill);
@@ -201,6 +211,7 @@ export class Hud {
       const mpBar = document.createElement("span");
       mpBar.className = "stat-bar stat-bar--mp";
       mpBar.title = `Mana ${member.mp}/${member.maxMp}`;
+      mpBar.dataset.value = `${Math.max(0, Math.round(member.mp))}/${Math.max(0, Math.round(member.maxMp))}`;
       const mpFill = document.createElement("span");
       mpFill.style.width = `${member.maxMp > 0 ? Math.max(0, Math.min(100, member.mp / member.maxMp * 100)) : 0}%`;
       mpBar.append(mpFill);
@@ -295,6 +306,58 @@ export class Hud {
       }
       button.addEventListener("click", () => this.onAbilityUse?.(slot.index));
       this.abilityHotbar.append(button);
+    }
+  }
+
+  #renderQuickInventory(world) {
+    if (!this.quickInventory) return;
+    const view = world.getInventoryView();
+    const activeId = world.activeMemberId;
+    const equipped = Object.fromEntries((view.equipment[activeId] || []).map((entry) => [entry.slotId, entry]));
+    const consumables = view.items.filter((entry) => entry.definition?.category === "consumable").slice(0, 3);
+    const keyItem = view.items.find((entry) => entry.itemId.includes("key") || entry.definition?.category === "quest");
+    const slots = [
+      { kind: "equipment", entry: equipped.mainHand, label: "Zbraň" },
+      { kind: "equipment", entry: equipped.body, label: "Zbroj" },
+      { kind: "equipment", entry: equipped.offHand || equipped.head, label: "Výstroj" },
+      ...consumables.map((entry) => ({ kind: "consumable", entry, label: entry.definition.name })),
+      { kind: "item", entry: keyItem, label: "Klíč" },
+      { kind: "gold", count: world.gold, label: "Zlato" },
+      { kind: "bag", count: view.usedSlots, max: view.maxSlots, label: "Batoh" },
+    ];
+    while (slots.length < 9) slots.splice(Math.max(3, slots.length - 2), 0, { kind: "empty", label: "Prázdné" });
+    slots.length = 9;
+
+    const signature = JSON.stringify(slots.map((slot) => [slot.kind, slot.entry?.itemId, slot.entry?.count, slot.count, slot.max]));
+    if (signature === this.lastQuickSignature) return;
+    this.lastQuickSignature = signature;
+    this.quickInventory.replaceChildren();
+
+    for (const slot of slots) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `quick-slot quick-slot--${slot.kind}`;
+      button.title = slot.entry?.definition?.name || slot.entry?.item?.name || slot.label;
+      const label = document.createElement("span");
+      label.className = "quick-slot__label";
+      label.textContent = slot.label || "";
+      const icon = document.createElement("span");
+      icon.className = "quick-slot__icon";
+      const itemId = slot.entry?.itemId;
+      const frame = itemId ? this.assets?.getItemIcon?.(itemId) : null;
+      if (!this.assets?.applyCssFrame?.(icon, frame)) {
+        icon.textContent = slot.kind === "gold" ? "●" : slot.kind === "bag" ? "▣" : slot.kind === "empty" ? "·" : "◇";
+      }
+      const count = document.createElement("span");
+      count.className = "quick-slot__count";
+      if (slot.kind === "gold") count.textContent = String(slot.count ?? 0);
+      else if (slot.kind === "bag") count.textContent = `${slot.count ?? 0}/${slot.max ?? 0}`;
+      else if (slot.entry?.count > 1) count.textContent = String(slot.entry.count);
+      button.append(label, icon, count);
+      if (slot.kind === "consumable" && itemId) button.addEventListener("click", () => this.onQuickItemUse?.(itemId));
+      else if (slot.kind !== "empty") button.addEventListener("click", () => this.onOpenInventory?.());
+      else button.disabled = true;
+      this.quickInventory.append(button);
     }
   }
 
